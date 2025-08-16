@@ -1,38 +1,35 @@
-const cors = require('cors');
-app.use(cors());
-app.use(express.json());
-const express = require('express');
-const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.post('/send', async (req, res) => {
-    const { to, subject, text } = req.body;
+app.post("/send", async (req, res) => {
+    console.log("Email send request received:", req.body); // LOGGING
 
     let transporter = nodemailer.createTransport({
-        service: 'gmail', // you can change this to SMTP later
+        service: "gmail",
         auth: {
-            user: 'YOUR_EMAIL@gmail.com',
-            pass: 'YOUR_APP_PASSWORD'
+            user: process.env.USER_EMAIL,
+            pass: process.env.USER_PASS
         }
     });
 
     try {
         await transporter.sendMail({
-            from: 'YOUR_EMAIL@gmail.com',
-            to,
-            subject,
-            text
+            from: process.env.USER_EMAIL,
+            to: req.body.to,
+            subject: req.body.subject,
+            text: req.body.text
         });
-        res.json({ success: true });
+
+        res.json({ message: "Email sent successfully!" });
     } catch (error) {
-        res.json({ success: false, error: error.message });
+        console.error(error);
+        res.status(500).json({ message: "Failed to send email." });
     }
 });
 
-
-app.listen(5000, () => console.log('Server running on port 5000'));
+app.listen(5000, () => console.log("Service running on port 5000"));
