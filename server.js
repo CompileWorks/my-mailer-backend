@@ -1,3 +1,6 @@
+const cors = require('cors');
+app.use(cors());
+app.use(express.json());
 const express = require('express');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
@@ -30,5 +33,6 @@ app.post('/send', async (req, res) => {
         res.json({ success: false, error: error.message });
     }
 });
+
 
 app.listen(5000, () => console.log('Server running on port 5000'));
