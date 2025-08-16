@@ -7,19 +7,22 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/send", async (req, res) => {
-    console.log("Email send request received:", req.body); // LOGGING
+    console.log("Email send request received:", req.body);
 
+    // Create SMTP transporter
     let transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: process.env.SMTP_HOST,      // e.g. smtp.gmail.com
+        port: process.env.SMTP_PORT,      // usually 465 for SSL, 587 for TLS
+        secure: process.env.SMTP_PORT == 465, // true for SSL, false for TLS
         auth: {
-            user: process.env.USER_EMAIL,
-            pass: process.env.USER_PASS
+            user: process.env.SMTP_USER,  // full email address
+            pass: process.env.SMTP_PASS   // SMTP password or app password
         }
     });
 
     try {
         await transporter.sendMail({
-            from: process.env.USER_EMAIL,
+            from: `"Mailer" <${process.env.SMTP_USER}>`,
             to: req.body.to,
             subject: req.body.subject,
             text: req.body.text
@@ -27,8 +30,8 @@ app.post("/send", async (req, res) => {
 
         res.json({ message: "Email sent successfully!" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Failed to send email." });
+        console.error("SMTP Error:", error);
+        res.status(500).json({ message: "Failed to send email.", error: error.message });
     }
 });
 
